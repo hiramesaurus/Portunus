@@ -71,9 +71,9 @@ namespace Hirame.Portunus.Editor
             {
                 do
                 {
-                    if (ignoredProperties.Contains (iterator.name))
+                    if (IsHiddenProperty (iterator))
                         continue;
-
+                    
                     drawerGroups[0].Add (new PropertyDrawer (iterator));
 
                     // This will ensure that we skip drawing the size of a array.
@@ -84,7 +84,11 @@ namespace Hirame.Portunus.Editor
             }
             
         }
-      
+
+        private bool IsHiddenProperty (SerializedProperty property)
+        {
+            return ignoredProperties.Contains (property.name);
+        }
       
         public static bool DrawPropertyWithChangeCheck (SerializedProperty property)
         {

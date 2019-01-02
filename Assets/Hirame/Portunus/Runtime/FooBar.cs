@@ -10,4 +10,6 @@ public class FooBar : MonoBehaviour
     public float FloatField;
 
     public string[] SomeArray;
+
+    public int[] OtherArray;
 }

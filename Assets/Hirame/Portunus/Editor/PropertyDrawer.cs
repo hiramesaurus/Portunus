@@ -11,11 +11,13 @@ namespace Hirame.Portunus.Editor
         public GUIContent Content { get; private set; }
 
         public bool HasChanged;
+        public bool HideLabel;
 
         public PropertyDrawer (SerializedProperty property)
         {
             Property = property.Copy ();
-            Content = new GUIContent(property.name);
+            HideLabel = ShouldHideLabel (property);
+            Content = new GUIContent(ObjectNames.NicifyVariableName (property.name));
         }
 
         public bool Draw ()
@@ -33,6 +35,15 @@ namespace Hirame.Portunus.Editor
             }
 
             return HasChanged;
+        }
+
+        private static bool ShouldHideLabel (SerializedProperty property)
+        {
+            if (string.IsNullOrWhiteSpace (property.name))
+                return true;
+            if (property.isArray && property.name.Equals ("data"))
+                return true;
+            return false;
         }
 
         private void DrawSimpleField (SerializedProperty prop, GUIContent content = null)
