@@ -8,13 +8,13 @@ namespace Hirame.Portunus.Editor
 {
     
     [CustomEditor (typeof (MonoBehaviour), true)]
-    public class PortunusEditor : UnityEditor.Editor
+    public class EditorBase : UnityEditor.Editor
     {        
         private readonly HashSet<string> ignoredProperties = new HashSet<string> { "Base" , "m_Script"}; 
         private readonly Dictionary<string, Action<SerializedProperty>> changedCallbacks = 
             new Dictionary<string, Action<SerializedProperty>> ();
         
-        private readonly List<PropertyDrawer> drawers = new List<PropertyDrawer> ();
+        private readonly List<PropertyGroup> drawerGroups = new List<PropertyGroup> ();
 
         protected virtual void OnEnable ()
         {
@@ -23,22 +23,30 @@ namespace Hirame.Portunus.Editor
 
         public override void OnInspectorGUI ()
         {
+            EditorGUILayout.Space ();
+            
             var requiresSaving = false;
-            foreach (var drawer in drawers)
+
+            foreach (var group in drawerGroups)
             {
-                if (!drawer.Draw ())
+                if (!group.DrawWithChangeCheck ())
                     continue;
-                
+
                 requiresSaving = true;
-                NotifyHasChanged (drawer.Property);
+                
+                foreach (var drawer in group.Drawers)
+                {
+                    NotifyHasChanged (drawer.Property);
+                }
             }
+            
             if (requiresSaving)
                 serializedObject.ApplyModifiedProperties ();
         }
 
         public void AddChangeListener (SerializedProperty property, Action<SerializedProperty> callback)
         {
-            if (changedCallbacks.TryGetValue (property.name, out var callbacks))
+            if (changedCallbacks.ContainsKey (property.name))
             {
                 changedCallbacks[property.name] += callback;
                 return;
@@ -56,17 +64,25 @@ namespace Hirame.Portunus.Editor
 
         private void CreateDrawers ()
         {            
-            drawers.Clear ();
+            drawerGroups.Clear ();
+            drawerGroups.Add (new PropertyGroup (null));
 
-            var iterator = serializedObject.GetIterator ();
-            do
+            using (var iterator = serializedObject.GetIterator ())
             {
-                if (ignoredProperties.Contains (iterator.name))
-                    continue;
-                
-               drawers.Add (new PropertyDrawer (iterator));
+                do
+                {
+                    if (ignoredProperties.Contains (iterator.name))
+                        continue;
 
-            } while (iterator.NextVisible (true));
+                    drawerGroups[0].Add (new PropertyDrawer (iterator));
+
+                    // This will ensure that we skip drawing the size of a array.
+                    if (iterator.isArray)
+                        iterator.NextVisible (true);
+
+                } while (iterator.NextVisible (true));
+            }
+            
         }
       
       
