@@ -1,0 +1,16 @@
+{
+    "name": "Hirame.Portunus.Editor",
+    "references": [
+        "Hirame.Portunus"
+    ],
+    "optionalUnityReferences": [],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": []
+}
