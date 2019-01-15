@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class FooBar : MonoBehaviour
 {
-    [Label ("Some Int")]
+    [Label ("Attribute Label")]
     public int IntField;
     public float FloatField;
 

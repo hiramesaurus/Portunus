@@ -14,7 +14,7 @@ namespace Hirame.Portunus
             Name = name;
         }
         
-        public override void ApplyOverrides (SerializedObject obj, SerializedProperty prop)
+        public override void ApplyOverrides ()
         {
             
         }

@@ -11,7 +11,7 @@ namespace Hirame.Portunus
             Label = label;
         }
 
-        public override void ApplyOverrides (SerializedObject obj, SerializedProperty prop)
+        public override void ApplyOverrides ()
         {
             
         }

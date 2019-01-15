@@ -10,7 +10,11 @@ namespace Hirame.Portunus.Editor
     [CustomEditor (typeof (MonoBehaviour), true)]
     public class EditorBase : UnityEditor.Editor
     {        
-        private readonly HashSet<string> ignoredProperties = new HashSet<string> { "Base" , "m_Script"}; 
+        private readonly HashSet<string> ignoredProperties = new HashSet<string>
+        {
+            "Base" , "m_Script"
+        }; 
+        
         private readonly Dictionary<string, Action<SerializedProperty>> changedCallbacks = 
             new Dictionary<string, Action<SerializedProperty>> ();
         
@@ -44,7 +48,8 @@ namespace Hirame.Portunus.Editor
                 serializedObject.ApplyModifiedProperties ();
         }
 
-        public void AddChangeListener (SerializedProperty property, Action<SerializedProperty> callback)
+        public void AddChangeListener (
+            SerializedProperty property, Action<SerializedProperty> callback)
         {
             if (changedCallbacks.ContainsKey (property.name))
             {
@@ -54,7 +59,8 @@ namespace Hirame.Portunus.Editor
             changedCallbacks.Add (property.name, callback);
         }
 
-        public void RemoveChangeListener (SerializedProperty property, Action<SerializedProperty> callback)
+        public void RemoveChangeListener (
+            SerializedProperty property, Action<SerializedProperty> callback)
         {
             if (!changedCallbacks.ContainsKey (property.name))
                 return;
@@ -69,18 +75,15 @@ namespace Hirame.Portunus.Editor
 
             using (var iterator = serializedObject.GetIterator ())
             {
+                iterator.NextVisible (true);
                 do
                 {
                     if (IsHiddenProperty (iterator))
-                        continue;
+                        continue;               
                     
                     drawerGroups[0].Add (new PropertyDrawer (iterator));
 
-                    // This will ensure that we skip drawing the size of a array.
-                    if (iterator.isArray)
-                        iterator.NextVisible (true);
-
-                } while (iterator.NextVisible (true));
+                } while (iterator.NextVisible (false));
             }
             
         }
@@ -92,10 +95,10 @@ namespace Hirame.Portunus.Editor
       
         public static bool DrawPropertyWithChangeCheck (SerializedProperty property)
         {
-            using (var changed = new EditorGUI.ChangeCheckScope ())
+            using (var changeScope = new EditorGUI.ChangeCheckScope ())
             {
                 EditorGUILayout.PropertyField (property);
-                return changed.changed;
+                return changeScope.changed;
             }
         }
 
