@@ -1,22 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Reflection;
+﻿using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
 namespace Hirame.Portunus.Editor
 {
-    
-    [CustomEditor (typeof (MonoBehaviour), true)]
+    public delegate void ChangeHandler (SerializedProperty property);
+   
+    [CustomEditor (typeof (Object), true)]
     public class EditorBase : UnityEditor.Editor
     {        
+        
         private readonly HashSet<string> ignoredProperties = new HashSet<string>
         {
             "Base" , "m_Script"
         }; 
         
-        private readonly Dictionary<string, Action<SerializedProperty>> changedCallbacks = 
-            new Dictionary<string, Action<SerializedProperty>> ();
+        private readonly Dictionary<string, ChangeHandler> changedCallbacks = 
+            new Dictionary<string, ChangeHandler> ();
         
         private readonly List<PropertyGroup> drawerGroups = new List<PropertyGroup> ();
 
@@ -49,7 +49,7 @@ namespace Hirame.Portunus.Editor
         }
 
         public void AddChangeListener (
-            SerializedProperty property, Action<SerializedProperty> callback)
+            SerializedProperty property, ChangeHandler callback)
         {
             if (changedCallbacks.ContainsKey (property.name))
             {
@@ -60,18 +60,19 @@ namespace Hirame.Portunus.Editor
         }
 
         public void RemoveChangeListener (
-            SerializedProperty property, Action<SerializedProperty> callback)
+            SerializedProperty property, ChangeHandler callback)
         {
-            if (!changedCallbacks.ContainsKey (property.name))
-                return;
-            // ReSharper disable once DelegateSubtraction
-            changedCallbacks[property.name] -= callback;
+            if (changedCallbacks.ContainsKey (property.name))
+            {
+                // ReSharper disable once DelegateSubtraction
+                changedCallbacks[property.name] -= callback;  
+            }        
         }
 
         private void CreateDrawers ()
         {            
             drawerGroups.Clear ();
-            drawerGroups.Add (new PropertyGroup (null));
+            drawerGroups.Add (new PropertyGroup (string.Empty));
 
             using (var iterator = serializedObject.GetIterator ())
             {
@@ -104,9 +105,8 @@ namespace Hirame.Portunus.Editor
 
         private void NotifyHasChanged (SerializedProperty property)
         {
-            if (!changedCallbacks.TryGetValue (property.name, out var callbacks))
-                return;
-            callbacks.Invoke (property);
+            if (changedCallbacks.TryGetValue (property.name, out var callbacks))
+                callbacks.Invoke (property);           
         }
         
     }

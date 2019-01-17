@@ -8,6 +8,17 @@ using UnityEngine;
 
 namespace Hirame.Portunus.Editor
 {
+    internal static class Styles
+    {
+        internal static GUIStyle ControlButton = new GUIStyle (EditorStyles.miniButton)
+        {
+            fixedWidth = 15,
+            fixedHeight = 14,
+            alignment = TextAnchor.MiddleCenter,
+            padding = new RectOffset(3, 0, 0, 0)
+        };
+    }
+    
     public class PropertyDrawer
     {
         public SerializedProperty Property { get; private set; }
@@ -97,35 +108,66 @@ namespace Hirame.Portunus.Editor
         {
             using (new GUILayout.VerticalScope (EditorStyles.helpBox))
             {
+                var expanded = Property.isExpanded;
                 // Draw Header
                 using (new EditorGUILayout.HorizontalScope ())
                 {
-                    EditorGUILayout.LabelField (Content, EditorStyles.boldLabel);
+                    EditorGUI.indentLevel++;
+                    expanded = EditorGUILayout.Foldout (expanded, Content, true);
+                    EditorGUI.indentLevel--;
+
+                    if (GUILayout.Button ("+", Styles.ControlButton))
+                    {
+                        Property.InsertArrayElementAtIndex (Property.arraySize);
+                        UpdatePropertyWithUndo ();
+                        return;
+                    }
+                    
                     Property.arraySize = Mathf.Max (
                         EditorGUILayout.IntField (Property.arraySize, GUILayout.Width (60)),
                         0);
                 }
+
+                Property.isExpanded = expanded;
+                if (!expanded)
+                    return;
 
                 // Draw Content
                 using (new EditorGUILayout.VerticalScope ())
                 {
                     for (var i = 0; i < Property.arraySize; i++)
                     {
-                        using (new EditorGUILayout.HorizontalScope ())
-                        {
-                            EditorGUILayout.LabelField (i.ToString (), GUILayout.Width (20));
-                            DrawSimpleField (Property.GetArrayElementAtIndex (i));
-                            if (GUILayout.Button ("X", GUILayout.Width (18)))
-                            {
-                                Debug.Log ($"Delete element {i.ToString()}");
-                                // TODO:
-                                // Actually add the deleting.
-                                // Notify that SerializedProperty should be updated.
-                            }
-                        }
+                        if (DrawDelete (i))
+                            return;
                     }
                 }
             }
+
+            bool DrawDelete (int index)
+            {
+                using (new EditorGUILayout.HorizontalScope ())
+                {
+                    EditorGUILayout.LabelField (index.ToString (), GUILayout.Width (20));
+                    DrawSimpleField (Property.GetArrayElementAtIndex (index));
+
+                    if (!GUILayout.Button ("X", Styles.ControlButton))
+                        return false;
+                    
+                    Property.DeleteArrayElementAtIndex (index);
+                    UpdatePropertyWithUndo ();
+                    return true;
+                }
+            }
+        }
+
+        private void UpdatePropertyWithUndo ()
+        {
+            var data = Property.serializedObject;
+            Undo.RecordObject (data.targetObject, "Undo list modification");
+
+            data.ApplyModifiedProperties ();
+            data.Update ();
+            Property = data.FindProperty (Property.name);
         }
     }
 }
