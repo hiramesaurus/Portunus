@@ -12,4 +12,6 @@ public class FooBar : MonoBehaviour
     public string[] SomeArray;
 
     public int[] OtherArray;
+
+    public MonoBehaviour[] ReferenceArray;
 }

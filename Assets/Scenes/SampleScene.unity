@@ -282,4 +282,5 @@ MonoBehaviour:
   - 
   - 
   - 
-  OtherArray: 00000000000000000000000000000000
+  OtherArray: 000000000000000000000000
+  ReferenceArray: []
