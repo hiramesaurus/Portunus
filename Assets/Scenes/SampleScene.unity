@@ -282,5 +282,8 @@ MonoBehaviour:
   - 
   - 
   - 
-  OtherArray: 000000000000000000000000
-  ReferenceArray: []
+  OtherArray: 020000000000000000000000
+  ReferenceArray:
+  - {fileID: 534669906}
+  - {fileID: 534669906}
+  - {fileID: 534669906}
