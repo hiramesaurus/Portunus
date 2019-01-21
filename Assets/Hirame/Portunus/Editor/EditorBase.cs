@@ -76,7 +76,9 @@ namespace Hirame.Portunus.Editor
 
             using (var iterator = serializedObject.GetIterator ())
             {
-                iterator.NextVisible (true);
+                if (!iterator.NextVisible (true))
+                    return;
+                
                 do
                 {
                     if (IsHiddenProperty (iterator))
