@@ -31,6 +31,7 @@ namespace Hirame.Portunus.Editor
                     if (GUILayout.Button ("+", Styles.ArrayControl))
                     {
                         property.InsertArrayElementAtIndex (arraySize);
+                        property.isExpanded = true;
                         return true;
                     }
                     

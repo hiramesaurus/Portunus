@@ -278,12 +278,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   IntField: 0
   FloatField: 0
-  SomeArray:
-  - 
+  TestString: A test string
+  StringArray:
   - 
   - 
   OtherArray: 02000000000000000000000000000000
-  ReferenceArray:
-  - {fileID: 534669906}
-  - {fileID: 534669906}
-  - {fileID: 534669906}
+  MonoArray:
+  - {fileID: 0}
+  ClassArray:
+  - IntField: 0
+    FloatField: 0

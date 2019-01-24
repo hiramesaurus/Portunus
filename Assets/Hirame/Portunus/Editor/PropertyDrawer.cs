@@ -8,22 +8,6 @@ using UnityEngine;
 
 namespace Hirame.Portunus.Editor
 {
-    internal static class Styles
-    {
-        internal static readonly GUIStyle ArrayControl = new GUIStyle (EditorStyles.miniButton)
-        {
-            fixedWidth = 15,
-            fixedHeight = 14,
-            alignment = TextAnchor.MiddleCenter,
-            padding = new RectOffset(3, 0, 0, 0)
-        };
-        
-        internal static readonly GUIStyle ArrayFoldout = new GUIStyle(EditorStyles.foldout)
-        {
-            fontStyle = FontStyle.Bold
-        }; 
-    }
-    
     public class PropertyDrawer
     {
         public SerializedProperty Property { get; private set; }
@@ -45,7 +29,7 @@ namespace Hirame.Portunus.Editor
 
             using (var changed = new EditorGUI.ChangeCheckScope ())
             {
-                if (Property.isArray)
+                if (Property.isArray && Property.hasVisibleChildren)
                 {
                     if (ArrayDrawer.Draw (Property, LabelContent))
                     {
