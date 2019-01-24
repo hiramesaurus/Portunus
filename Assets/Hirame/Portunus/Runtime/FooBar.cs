@@ -9,12 +9,16 @@ public class FooBar : MonoBehaviour
     
     public string TestString;
 
+    public AClass SimpleClass;
+    
     public string[] StringArray;
 
     public int[] OtherArray;
 
     public MonoBehaviour[] MonoArray;
 
+
+    
     public AClass[] ClassArray;
 
     [System.Serializable]

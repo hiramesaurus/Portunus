@@ -15,12 +15,47 @@ namespace Hirame.Portunus.Editor
 
         public bool HasChanged;
         public bool HideLabel;
+        public bool HasChildDrawers;
+        
+        public List<PropertyDrawer> ChildDrawers;
 
         public PropertyDrawer (SerializedProperty property)
         {
             Property = property.Copy ();
             HideLabel = ShouldHideLabel (property);
             LabelContent = new GUIContent (GetName (property));
+            HasChildDrawers = CheckForNesting (property);
+        }
+
+        private bool CheckForNesting (SerializedProperty property)
+        {
+            ChildDrawers = new List<PropertyDrawer> ();
+
+            if (!property.isArray && property.hasVisibleChildren)
+            {
+                var next = property.Copy ();
+                var depth = next.depth;
+                var enter = true;
+                
+                while (next.NextVisible (enter) && depth != next.depth)
+                {
+                    Debug.Log (next.displayName);
+                    enter = false;
+                    ChildDrawers.Add (new PropertyDrawer (next));
+                }
+                return true;
+            }
+
+//            for (var i = 0; i < property.arraySize; i++)
+//            {
+//               ChildDrawers.Add (new PropertyDrawer (property.GetArrayElementAtIndex (i)));
+//            }
+            return false;
+        }
+
+        private static bool IsRealArray (SerializedProperty property)
+        {
+            return property.hasVisibleChildren && property.isArray;
         }
 
         public bool Draw ()
@@ -29,15 +64,23 @@ namespace Hirame.Portunus.Editor
 
             using (var changed = new EditorGUI.ChangeCheckScope ())
             {
-                if (Property.isArray && Property.hasVisibleChildren)
+                if (IsRealArray (Property))
                 {
                     if (ArrayDrawer.Draw (Property, LabelContent))
                     {
                         UpdatePropertyWithUndo ();
                     }
                 }
-                else
+                else if (Property.hasVisibleChildren && Property.isExpanded)
+                {
                     DrawSimpleField (Property, LabelContent);
+                    DrawChildren ();
+                }
+                else
+                {
+                    DrawSimpleField (Property, LabelContent);
+                }
+                    
 
                 HasChanged = changed.changed;
             }
@@ -45,6 +88,18 @@ namespace Hirame.Portunus.Editor
             return HasChanged;
         }
 
+        private void DrawChildren ()
+        {
+            EditorGUI.indentLevel++;
+            
+            foreach (var child in ChildDrawers)
+            {
+                child.Draw ();
+            }
+
+            EditorGUI.indentLevel--;
+        }
+        
         /// <summary>
         /// THIS IS ACTUALLY NOT ONLY GETTING NAME
         /// </summary>
@@ -56,7 +111,6 @@ namespace Hirame.Portunus.Editor
             // Figure out some super cool way of having those properties be
             // generically applicable.
             var attributes = GetDrawerAttributes (property);
-
             var customLabel = attributes.FirstOrDefault (a => a is LabelAttribute);
             
             // TODO:
@@ -64,8 +118,7 @@ namespace Hirame.Portunus.Editor
             if (customLabel != null)
             {
                 return (customLabel as LabelAttribute).Label;
-            }
-            
+            }            
             
             return ObjectNames.NicifyVariableName (property.name);
         }
