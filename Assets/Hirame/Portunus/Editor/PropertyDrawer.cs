@@ -16,41 +16,61 @@ namespace Hirame.Portunus.Editor
         public bool HasChanged;
         public bool HideLabel;
         public bool HasChildDrawers;
-        
+        public bool ParentIsArray;
+
         public List<PropertyDrawer> ChildDrawers;
 
-        public PropertyDrawer (SerializedProperty property)
+        public int ChildCount => HasChildDrawers ? ChildDrawers.Count : 0;
+        
+        public PropertyDrawer (SerializedProperty property, bool parentIsArray = false)
         {
             Property = property.Copy ();
             HideLabel = ShouldHideLabel (property);
             LabelContent = new GUIContent (GetName (property));
-            HasChildDrawers = CheckForNesting (property);
+            HasChildDrawers = UpdateChildDrawers (property);
+            ParentIsArray = parentIsArray;
         }
 
-        private bool CheckForNesting (SerializedProperty property)
+        public bool UpdateChildDrawers (SerializedProperty property)
         {
+            if (!property.hasVisibleChildren)
+            {
+                //Debug.Log ("No child drawers");
+                return false;
+            }
+
             ChildDrawers = new List<PropertyDrawer> ();
 
-            if (!property.isArray && property.hasVisibleChildren)
+            var next = property.Copy ();
+            var depth = next.depth;
+            var enter = true;
+
+            // The property is a array of data structures
+            if (property.isArray && property.hasVisibleChildren)
             {
-                var next = property.Copy ();
-                var depth = next.depth;
-                var enter = true;
-                
+                if (property.arraySize == 0 || !property.GetArrayElementAtIndex (0).hasVisibleChildren)
+                {
+                    return false;
+                }
+
+                for (var i = 0; i < property.arraySize; i++)
+                {
+                    ChildDrawers.Add (new PropertyDrawer (property.GetArrayElementAtIndex (i), true));
+                }
+            }
+            else
+            {
+                //Debug.Log ($"{property.name} is simple data structure.");
+                // The property is a data structure
                 while (next.NextVisible (enter) && depth != next.depth)
                 {
                     Debug.Log (next.displayName);
                     enter = false;
                     ChildDrawers.Add (new PropertyDrawer (next));
                 }
-                return true;
             }
 
-//            for (var i = 0; i < property.arraySize; i++)
-//            {
-//               ChildDrawers.Add (new PropertyDrawer (property.GetArrayElementAtIndex (i)));
-//            }
-            return false;
+            return true;
         }
 
         private static bool IsRealArray (SerializedProperty property)
@@ -64,23 +84,30 @@ namespace Hirame.Portunus.Editor
 
             using (var changed = new EditorGUI.ChangeCheckScope ())
             {
-                if (IsRealArray (Property))
+                if (HasChildDrawers)
                 {
-                    if (ArrayDrawer.Draw (Property, LabelContent))
+                    if (!Property.isArray)
+                    {
+                        DrawChildren ();
+                    }
+                    if (ArrayDrawer.Draw (this))
                     {
                         UpdatePropertyWithUndo ();
                     }
                 }
-                else if (Property.hasVisibleChildren && Property.isExpanded)
+                else if (IsRealArray (Property))
                 {
-                    DrawSimpleField (Property, LabelContent);
-                    DrawChildren ();
+                    if (ArrayDrawer.Draw (this))
+                    {
+                        UpdatePropertyWithUndo ();
+                    }
                 }
+
                 else
                 {
                     DrawSimpleField (Property, LabelContent);
                 }
-                    
+
 
                 HasChanged = changed.changed;
             }
@@ -89,17 +116,25 @@ namespace Hirame.Portunus.Editor
         }
 
         private void DrawChildren ()
-        {
-            EditorGUI.indentLevel++;
-            
-            foreach (var child in ChildDrawers)
-            {
-                child.Draw ();
-            }
+        {           
+            using (var scope = new GUILayout.VerticalScope (EditorStyles.helpBox))
+            {                        
+                DrawSimpleField (Property, LabelContent);
+                if (!Property.isExpanded)
+                    return;
+                
+                EditorGUI.indentLevel++;
 
-            EditorGUI.indentLevel--;
+                foreach (var child in ChildDrawers)
+                {
+                    child.Draw ();
+                }
+
+                EditorGUI.indentLevel--;
+            }
+           
         }
-        
+
         /// <summary>
         /// THIS IS ACTUALLY NOT ONLY GETTING NAME
         /// </summary>
@@ -112,14 +147,14 @@ namespace Hirame.Portunus.Editor
             // generically applicable.
             var attributes = GetDrawerAttributes (property);
             var customLabel = attributes.FirstOrDefault (a => a is LabelAttribute);
-            
+
             // TODO:
             // For now this is just a super stupid way of doing a custom label
             if (customLabel != null)
             {
                 return (customLabel as LabelAttribute).Label;
-            }            
-            
+            }
+
             return ObjectNames.NicifyVariableName (property.name);
         }
 
@@ -146,10 +181,10 @@ namespace Hirame.Portunus.Editor
             return string.IsNullOrWhiteSpace (property.name) || property.isArray;
         }
 
-        private void DrawSimpleField (SerializedProperty prop, GUIContent content = null)
+        private static void DrawSimpleField (SerializedProperty prop, GUIContent content = null)
         {
             EditorGUILayout.PropertyField (prop, content ?? GUIContent.none);
-        }    
+        }
 
         private void UpdatePropertyWithUndo ()
         {

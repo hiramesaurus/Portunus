@@ -279,12 +279,17 @@ MonoBehaviour:
   IntField: 0
   FloatField: 0
   TestString: A test string
+  SimpleClass:
+    AIntField: 0
+    AFloatField: 0
   StringArray:
   - 
   - 
-  OtherArray: 02000000000000000000000000000000
+  OtherArray: 020000001d0000000000000000000000
   MonoArray:
   - {fileID: 0}
   ClassArray:
-  - IntField: 0
-    FloatField: 0
+  - AIntField: 0
+    AFloatField: 0
+  - AIntField: 0
+    AFloatField: 0

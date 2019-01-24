@@ -24,7 +24,7 @@ public class FooBar : MonoBehaviour
     [System.Serializable]
     public class AClass
     {
-        public int IntField;
-        public float FloatField;
+        public int AIntField;
+        public float AFloatField;
     }
 }
