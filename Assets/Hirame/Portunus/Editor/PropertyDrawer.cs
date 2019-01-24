@@ -92,6 +92,8 @@ namespace Hirame.Portunus.Editor
                     }
                     if (ArrayDrawer.Draw (this))
                     {
+                        // TODO:
+                        // Add a undo variant that disposes and rebuilds drawers.
                         UpdatePropertyWithUndo ();
                     }
                 }
