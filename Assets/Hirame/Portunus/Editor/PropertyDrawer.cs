@@ -39,7 +39,10 @@ namespace Hirame.Portunus.Editor
                 return false;
             }
 
-            ChildDrawers = new List<PropertyDrawer> ();
+            if (ChildDrawers == null)
+                ChildDrawers = new List<PropertyDrawer> ();
+            else
+                ChildDrawers.Clear ();
 
             var next = property.Copy ();
             var depth = next.depth;
@@ -94,7 +97,9 @@ namespace Hirame.Portunus.Editor
                     {
                         // TODO:
                         // Add a undo variant that disposes and rebuilds drawers.
+                        // Or maybe this is good enough?
                         UpdatePropertyWithUndo ();
+                        UpdateChildDrawers (Property);
                     }
                 }
                 else if (IsRealArray (Property))
@@ -104,7 +109,6 @@ namespace Hirame.Portunus.Editor
                         UpdatePropertyWithUndo ();
                     }
                 }
-
                 else
                 {
                     DrawSimpleField (Property, LabelContent);

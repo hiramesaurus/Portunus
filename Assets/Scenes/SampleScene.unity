@@ -287,8 +287,13 @@ MonoBehaviour:
   - 
   OtherArray: 020000001d0000000000000000000000
   MonoArray:
+  - {fileID: 534669906}
   - {fileID: 0}
   ClassArray:
+  - AIntField: 4
+    AFloatField: 0
+  - AIntField: 0
+    AFloatField: 0
   - AIntField: 0
     AFloatField: 0
   - AIntField: 0

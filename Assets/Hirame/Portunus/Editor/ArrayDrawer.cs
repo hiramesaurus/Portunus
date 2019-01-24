@@ -45,14 +45,14 @@ namespace Hirame.Portunus.Editor
                         property.isExpanded = expanded;
                         return false;
                     }
-                    
+
                     if (GUILayout.Button ("+", Styles.ArrayControl))
                     {
                         property.InsertArrayElementAtIndex (arraySize);
                         property.isExpanded = true;
                         return true;
                     }
-                    
+
                     property.arraySize = Mathf.Max (
                         EditorGUILayout.IntField (arraySize, GUILayout.Width (60)),
                         0);
@@ -65,16 +65,22 @@ namespace Hirame.Portunus.Editor
                 // Draw Content
                 using (new EditorGUILayout.VerticalScope ())
                 {
-                    foreach (var child in drawer.ChildDrawers)
+                    var childDrawers = drawer.ChildDrawers;
+                    for (var i = 0; i < childDrawers.Count; i++)
                     {
-                        child.Draw ();
+                        using (new EditorGUILayout.HorizontalScope ())
+                        {
+                            childDrawers[i].Draw ();
+                            if (DrawDelete (property, i))
+                                return true;
+                        }
                     }
                 }
             }
 
             return false;
         }
-        
+
         private static bool DrawBottomLevelArray (SerializedProperty property, GUIContent label)
         {
             var arraySize = property.arraySize;
@@ -90,14 +96,14 @@ namespace Hirame.Portunus.Editor
                         property.isExpanded = expanded;
                         return false;
                     }
-                    
+
                     if (GUILayout.Button ("+", Styles.ArrayControl))
                     {
                         property.InsertArrayElementAtIndex (arraySize);
                         property.isExpanded = true;
                         return true;
                     }
-                    
+
                     property.arraySize = Mathf.Max (
                         EditorGUILayout.IntField (arraySize, GUILayout.Width (60)),
                         0);
@@ -125,36 +131,42 @@ namespace Hirame.Portunus.Editor
         {
             var originalState = isExpanded;
             EditorGUI.indentLevel++;
-            
+
             if (hasElements)
             {
                 isExpanded = EditorGUILayout.Foldout (
                     isExpanded, label, true, Styles.ArrayFoldout);
             }
-            
+
             else
             {
                 EditorGUILayout.LabelField (label);
             }
-            
+
             EditorGUI.indentLevel--;
 
             return isExpanded != originalState;
         }
-        
+
         private static bool DrawRow (SerializedProperty property, int index)
         {
             using (new EditorGUILayout.HorizontalScope ())
             {
                 EditorGUILayout.LabelField (index.ToString (), GUILayout.Width (20));
                 EditorGUILayout.PropertyField (property.GetArrayElementAtIndex (index), GUIContent.none);
-                
-                if (!GUILayout.Button ("X", Styles.ArrayControl))
-                    return false;
-                    
+                return DrawDelete (property, index);
+            }
+        }
+
+        private static bool DrawDelete (SerializedProperty property, int index)
+        {
+            if (GUILayout.Button ("X", Styles.ArrayControl))
+            {
                 property.DeleteArrayElementAtIndex (index);
                 return true;
             }
+
+            return false;
         }
     }
 }
