@@ -8,6 +8,11 @@ public class FooBar : MonoBehaviour
     public float FloatField;
     
     public string TestString;
+    
+    public bool ShowSecret;
+    
+    [ShowIf (nameof (ShowSecret), true)]
+    public string Secret = "Boo!";
 
     public AClass SimpleClass;
     

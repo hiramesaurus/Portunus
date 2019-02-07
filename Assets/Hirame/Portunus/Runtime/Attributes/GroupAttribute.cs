@@ -1,11 +1,9 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEditor;
-using UnityEngine;
+﻿using System;
 
 namespace Hirame.Portunus
 {
-    public class GroupAttribute : PortunusPropertyAttribute
+    [AttributeUsage (AttributeTargets.Field)]
+    public class GroupAttribute : System.Attribute
     {
         public string Name;
 
@@ -14,10 +12,6 @@ namespace Hirame.Portunus
             Name = name;
         }
         
-        public override void ApplyOverrides ()
-        {
-            
-        }
     }
 
 }

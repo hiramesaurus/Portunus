@@ -2,7 +2,7 @@
 
 namespace Hirame.Portunus
 {
-    public class LabelAttribute : PortunusPropertyAttribute
+    public class LabelAttribute : DrawerAttribute
     {
         public string Label { get; private set; }
 
@@ -11,9 +11,9 @@ namespace Hirame.Portunus
             Label = label;
         }
 
-        public override void ApplyOverrides ()
+        public override string CustomLabel (string label)
         {
-            
+            return Label;
         }
     }
 

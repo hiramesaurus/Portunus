@@ -13,6 +13,7 @@ namespace Hirame.Portunus.Editor
         public SerializedProperty Property { get; private set; }
         public GUIContent LabelContent { get; private set; }
 
+        public bool IsVisible;
         public bool HasChanged;
         public bool HideLabel;
         public bool HasChildDrawers;
@@ -20,13 +21,17 @@ namespace Hirame.Portunus.Editor
 
         public List<PropertyDrawer> ChildDrawers;
 
+        public List<DynamicDrawerAttribute> CustomDrawers = new List<DynamicDrawerAttribute> ();
+        
         public int ChildCount => HasChildDrawers ? ChildDrawers.Count : 0;
         
         public PropertyDrawer (SerializedProperty property, bool parentIsArray = false)
         {
             Property = property.Copy ();
+            var attributes = GetDrawerAttributes (property);
+            LabelContent = ApplyCustomDrawers (property, attributes);
+                        
             HideLabel = ShouldHideLabel (property);
-            LabelContent = new GUIContent (GetName (property));
             HasChildDrawers = UpdateChildDrawers (property);
             ParentIsArray = parentIsArray;
         }
@@ -67,7 +72,7 @@ namespace Hirame.Portunus.Editor
                 // The property is a data structure
                 while (next.NextVisible (enter) && depth != next.depth)
                 {
-                    Debug.Log (next.displayName);
+                    //Debug.Log (next.displayName);
                     enter = false;
                     ChildDrawers.Add (new PropertyDrawer (next));
                 }
@@ -81,8 +86,23 @@ namespace Hirame.Portunus.Editor
             return property.hasVisibleChildren && property.isArray;
         }
 
+        private void CheckCustomDrawers ()
+        {
+            IsVisible = true;
+            foreach (var drawer in CustomDrawers)
+            {
+                drawer.Initialize (Property);
+                IsVisible = IsVisible & drawer.IsVisible;
+            }
+        }
+
         public bool Draw ()
         {
+            CheckCustomDrawers ();
+            
+            if (!IsVisible)
+                return false;
+            
             HasChanged = false;
 
             using (var changed = new EditorGUI.ChangeCheckScope ())
@@ -123,7 +143,7 @@ namespace Hirame.Portunus.Editor
 
         private void DrawChildren ()
         {           
-            using (var scope = new GUILayout.VerticalScope (EditorStyles.helpBox))
+            using (new GUILayout.VerticalScope (EditorStyles.helpBox))
             {                        
                 DrawSimpleField (Property, LabelContent);
                 if (!Property.isExpanded)
@@ -141,41 +161,34 @@ namespace Hirame.Portunus.Editor
            
         }
 
-        /// <summary>
-        /// THIS IS ACTUALLY NOT ONLY GETTING NAME
-        /// </summary>
-        /// <param name="property"></param>
-        /// <returns></returns>
-        private string GetName (SerializedProperty property)
+        private GUIContent ApplyCustomDrawers (SerializedProperty property, IEnumerable<DrawerAttribute> attr)
         {
-            // TODO:
-            // Figure out some super cool way of having those properties be
-            // generically applicable.
-            var attributes = GetDrawerAttributes (property);
-            var customLabel = attributes.FirstOrDefault (a => a is LabelAttribute);
-
-            // TODO:
-            // For now this is just a super stupid way of doing a custom label
-            if (customLabel != null)
+            var content = new GUIContent(property.displayName);
+            foreach (var drawer in attr)
             {
-                return (customLabel as LabelAttribute).Label;
+                drawer.Initialize (property);
+                content.text = drawer.CustomLabel (content.text);
+                IsVisible = IsVisible & drawer.IsVisible;
+                
+                if (drawer is DynamicDrawerAttribute item)
+                    CustomDrawers.Add (item);
             }
-
-            return ObjectNames.NicifyVariableName (property.name);
+           
+            return content;
         }
 
-        private static IEnumerable<PortunusPropertyAttribute> GetDrawerAttributes (SerializedProperty property)
+        private static IEnumerable<DrawerAttribute> GetDrawerAttributes (SerializedProperty property)
         {
             var fieldInfo = property.serializedObject.targetObject
                 .GetType ().GetField (property.name);
 
-            var list = new List<PortunusPropertyAttribute> ();
+            var list = new List<DrawerAttribute> ();
             if (fieldInfo == null)
                 return list;
 
             foreach (var attr in fieldInfo.GetCustomAttributes ())
             {
-                if (attr is PortunusPropertyAttribute item)
+                if (attr is DrawerAttribute item)
                     list.Add (item);
             }
 
