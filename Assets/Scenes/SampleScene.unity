@@ -310,6 +310,8 @@ MonoBehaviour:
   TestString: A test string
   ShowSecret: 1
   Secret: Boo!
+  EnumValue: 2
+  ShowIfKay: Kay
   SimpleClass:
     AIntField: 0
     AFloatField: 0

@@ -12,6 +12,10 @@ namespace Hirame.Portunus
         public ShowIfAttribute (string memberName, bool value) : base (memberName, value)
         {
         }
+        
+        public ShowIfAttribute (string memberName, object value) : base (memberName, value)
+        {       
+        }
     }
 
 }

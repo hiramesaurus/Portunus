@@ -15,6 +15,10 @@ namespace Hirame.Portunus
         {
         }
 
+        public HideIfAttribute (string memberName, object value) : base (memberName, value)
+        {       
+        }
+        
         public override bool IsVisible => !base.IsVisible;
     }
 

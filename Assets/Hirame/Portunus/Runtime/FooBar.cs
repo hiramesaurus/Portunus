@@ -1,8 +1,11 @@
-﻿using Hirame.Portunus;
+﻿using System.Runtime.InteropServices.ComTypes;
+using Hirame.Portunus;
 using UnityEngine;
 
 public class FooBar : MonoBehaviour
 {
+    public enum SuperEnum { Asd, Wasd, Kay }
+    
     [Label ("Attribute Label")]
     public int IntField;
     public float FloatField;
@@ -14,6 +17,11 @@ public class FooBar : MonoBehaviour
     [ShowIf (nameof (ShowSecret), true)]
     public string Secret = "Boo!";
 
+    public SuperEnum EnumValue;
+
+    [ShowIf (nameof (EnumValue), SuperEnum.Kay)]
+    public string ShowIfKay = "Kay";
+    
     public AClass SimpleClass;
     
     public string[] StringArray;
