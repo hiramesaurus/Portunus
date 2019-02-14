@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-namespace Hirame.Portunus
+namespace Hiramesaurus.Portunus
 {
     public class HideIfAttribute : ConditionAttribute
     {

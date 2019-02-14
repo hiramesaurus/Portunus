@@ -1,5 +1,5 @@
 ﻿using System.Runtime.InteropServices.ComTypes;
-using Hirame.Portunus;
+using Hiramesaurus.Portunus;
 using UnityEngine;
 
 public class FooBar : MonoBehaviour

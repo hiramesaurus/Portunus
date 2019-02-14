@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Hirame.Portunus
+namespace Hiramesaurus.Portunus
 {
     [AttributeUsage (AttributeTargets.Field)]
     public class ShowIfAttribute : ConditionAttribute

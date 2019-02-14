@@ -1,7 +1,7 @@
 ﻿
 using UnityEditor;
 
-namespace Hirame.Portunus
+namespace Hiramesaurus.Portunus
 {
     public abstract class DrawerAttribute : System.Attribute
     {

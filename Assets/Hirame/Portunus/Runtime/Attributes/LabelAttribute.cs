@@ -1,6 +1,6 @@
 ﻿using UnityEditor;
 
-namespace Hirame.Portunus
+namespace Hiramesaurus.Portunus
 {
     public class LabelAttribute : DrawerAttribute
     {

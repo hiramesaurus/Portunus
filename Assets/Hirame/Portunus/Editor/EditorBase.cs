@@ -2,7 +2,7 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace Hirame.Portunus.Editor
+namespace Hiramesaurus.Portunus.Editor
 {
     public delegate void ChangeHandler (SerializedProperty property);
    

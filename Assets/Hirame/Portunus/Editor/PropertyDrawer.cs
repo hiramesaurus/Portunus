@@ -6,7 +6,7 @@ using System.Reflection;
 using UnityEditor;
 using UnityEngine;
 
-namespace Hirame.Portunus.Editor
+namespace Hiramesaurus.Portunus.Editor
 {
     public class PropertyDrawer
     {

@@ -1,5 +1,5 @@
 ﻿using System;
-using Hirame.Portunus;
+using Hiramesaurus.Portunus;
 
 [AttributeUsage (AttributeTargets.Field)]
 public class DynamicDrawerAttribute : DrawerAttribute
