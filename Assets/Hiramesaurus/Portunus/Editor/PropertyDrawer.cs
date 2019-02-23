@@ -70,7 +70,7 @@ namespace Hiramesaurus.Portunus.Editor
             {
                 //Debug.Log ($"{property.name} is simple data structure.");
                 // The property is a data structure
-                while (next.NextVisible (enter) && depth != next.depth)
+                while (next.NextVisible (enter) && depth < next.depth)
                 {
                     //Debug.Log (next.displayName);
                     enter = false;
@@ -157,8 +157,7 @@ namespace Hiramesaurus.Portunus.Editor
                 }
 
                 EditorGUI.indentLevel--;
-            }
-           
+            }       
         }
 
         private GUIContent ApplyCustomDrawers (SerializedProperty property, IEnumerable<DrawerAttribute> attr)
